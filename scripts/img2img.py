@@ -40,7 +40,7 @@ def load_model_from_config(config, ckpt, verbose=False):
         print("unexpected keys:")
         print(u)
 
-    model.cuda()
+    # model.cuda()
     model.eval()
     return model
 
@@ -200,7 +200,7 @@ def main():
     model = load_model_from_config(config, f"{opt.ckpt}")
 
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-    model = model.to(device)
+    # model = model.to(device)
 
     if opt.plms:
         raise NotImplementedError("PLMS sampler not (yet) supported")
@@ -242,7 +242,7 @@ def main():
 
     precision_scope = autocast if opt.precision == "autocast" else nullcontext
     with torch.no_grad():
-        with precision_scope("cuda"):
+        # with precision_scope("cuda"):
             with model.ema_scope():
                 tic = time.time()
                 all_samples = list()
