@@ -106,6 +106,13 @@ def main():
         help="the prompt to render"
     )
     parser.add_argument(
+        "--exclude_prompt",
+        type=str,
+        nargs="?",
+        default="",
+        help="the exclude prompt to render"
+    )
+    parser.add_argument(
         "--outdir",
         type=str,
         nargs="?",
@@ -267,14 +274,17 @@ def main():
     n_rows = opt.n_rows if opt.n_rows > 0 else batch_size
     if not opt.from_file:
         prompt = opt.prompt
+        exclude_prompt = opt.exclude_prompt
         assert prompt is not None
         data = [batch_size * [prompt]]
+        exclude_data = [batch_size * [exclude_prompt]]
 
     else:
         print(f"reading prompts from {opt.from_file}")
         with open(opt.from_file, "r") as f:
             data = f.read().splitlines()
             data = list(chunk(data, batch_size))
+        exclude_data = [batch_size * [""]]
 
     sample_path = os.path.join(outpath, "samples")
     os.makedirs(sample_path, exist_ok=True)
@@ -292,13 +302,14 @@ def main():
                 tic = time.time()
                 all_samples = list()
                 for n in trange(opt.n_iter, desc="Sampling"):
-                    for prompts in tqdm(data, desc="data"):
-                        uc = None
-                        if opt.scale != 1.0:
-                            uc = model.get_learned_conditioning(batch_size * [""])
-                        if isinstance(prompts, tuple):
-                            prompts = list(prompts)
+                    for prompts, exclude_prompts in tqdm(list(zip(data, exclude_data)), desc="data"):
+                        # uc = None
+                        # if opt.scale != 1.0:
+                        #     uc = model.get_learned_conditioning(batch_size * [""])
+                        # if isinstance(prompts, tuple):
+                        #     prompts = list(prompts)
                         c = model.get_learned_conditioning(prompts)
+                        uc = model.get_learned_conditioning(exclude_prompts)
                         shape = [opt.C, opt.H // opt.f, opt.W // opt.f]
                         samples_ddim, _ = sampler.sample(S=opt.ddim_steps,
                                                          conditioning=c,
