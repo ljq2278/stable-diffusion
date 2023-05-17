@@ -164,7 +164,7 @@ def main():
     parser.add_argument(
         "--n_iter",
         type=int,
-        default=2,
+        default=1,
         help="sample this often",
     )
     parser.add_argument(
@@ -194,7 +194,7 @@ def main():
     parser.add_argument(
         "--n_samples",
         type=int,
-        default=3,
+        default=1,
         help="how many samples to produce for each given prompt. A.k.a. batch size",
     )
     parser.add_argument(
@@ -275,6 +275,7 @@ def main():
     if not opt.from_file:
         prompt = opt.prompt
         exclude_prompt = opt.exclude_prompt
+        exclude_prompt = ','.join([''+x for x in exclude_prompt.split(',')])
         assert prompt is not None
         data = [batch_size * [prompt]]
         exclude_data = [batch_size * [exclude_prompt]]
